@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogSpace — Register</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-blog"></i> BlogSpace
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="login.html">Login</a>
+                <a href="register.html" class="btn btn-primary btn-sm active">Sign Up</a>
+            </div>
+            <button class="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Register Section -->
+    <section class="auth-page">
+        <div class="auth-card fade-in">
+            <h2>Create Account ✨</h2>
+            <p class="subtitle">Join BlogSpace and start sharing your stories</p>
+
+            <div id="registerAlert" class="alert"></div>
+
+            <form id="registerForm" novalidate>
+                <div class="form-group">
+                    <label for="regName">Full Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="regName" placeholder="Enter your full name" required>
+                    </div>
+                    <p class="error-msg"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="regEmail">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="regEmail" placeholder="Enter your email" required>
+                    </div>
+                    <p class="error-msg"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="regPassword" placeholder="Create a password" required>
+                    </div>
+                    <p class="error-msg"></p>
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-bar-fill"></div>
+                        </div>
+                        <span class="strength-text"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regConfirmPassword">Confirm Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="regConfirmPassword" placeholder="Confirm your password" required>
+                    </div>
+                    <p class="error-msg"></p>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+
+            <div class="divider">or</div>
+
+            <p class="auth-footer">
+                Already have an account? <a href="login.html">Login here</a>
+            </p>
+        </div>
+    </section>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

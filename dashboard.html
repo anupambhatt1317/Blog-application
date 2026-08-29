@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogSpace — Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-blog"></i> BlogSpace
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html" class="active">Dashboard</a>
+                <a href="create-blog.html">Create Post</a>
+                <a href="login.html" class="btn btn-secondary btn-sm">Logout</a>
+            </div>
+            <button class="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="dashboard-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-profile">
+                <div class="sidebar-avatar">AK</div>
+                <h3>Aman Kumar</h3>
+                <p>@amankumar</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="active">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+                <a href="#">
+                    <i class="fas fa-file-alt"></i> My Posts
+                </a>
+                <a href="create-blog.html">
+                    <i class="fas fa-plus-circle"></i> Create Post
+                </a>
+                <a href="#">
+                    <i class="fas fa-bookmark"></i> Bookmarks
+                </a>
+                <a href="#">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+                <a href="#">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="login.html">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Toggle Button (Mobile) -->
+        <button class="sidebar-toggle-btn" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <h1>Dashboard</h1>
+                <a href="create-blog.html" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Post
+                </a>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>12</h3>
+                        <p>Total Posts</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>8</h3>
+                        <p>Published</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>4</h3>
+                        <p>Drafts</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>3.2K</h3>
+                        <p>Total Views</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Posts Table -->
+            <div class="posts-section">
+                <div class="posts-section-header">
+                    <h2>My Blog Posts</h2>
+                    <div>
+                        <a href="create-blog.html" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Add New
+                        </a>
+                    </div>
+                </div>
+
+                <div class="posts-table-wrapper">
+                    <table class="posts-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Views</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Getting Started with Web Development</strong></td>
+                                <td><span class="status-badge status-published">Published</span></td>
+                                <td>Aug 25, 2025</td>
+                                <td>842</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn edit" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <button class="action-btn delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UI/UX Design Principles</strong></td>
+                                <td><span class="status-badge status-published">Published</span></td>
+                                <td>Aug 22, 2025</td>
+                                <td>654</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn edit" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <button class="action-btn delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>JavaScript ES6+ Features You Must Know</strong></td>
+                                <td><span class="status-badge status-published">Published</span></td>
+                                <td>Aug 20, 2025</td>
+                                <td>521</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn edit" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <button class="action-btn delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>CSS Grid vs Flexbox</strong></td>
+                                <td><span class="status-badge status-draft">Draft</span></td>
+                                <td>Aug 18, 2025</td>
+                                <td>—</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn edit" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <button class="action-btn delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Building REST APIs with Node.js</strong></td>
+                                <td><span class="status-badge status-draft">Draft</span></td>
+                                <td>Aug 15, 2025</td>
+                                <td>—</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn edit" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <button class="action-btn delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Responsive Design Best Practices</strong></td>
+                                <td><span class="status-badge status-published">Published</span></td>
+                                <td>Aug 12, 2025</td>
+                                <td>390</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn edit" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <button class="action-btn delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

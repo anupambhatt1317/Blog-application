@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogSpace — Create Blog</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-blog"></i> BlogSpace
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="create-blog.html" class="active">Create Post</a>
+                <a href="login.html" class="btn btn-secondary btn-sm">Logout</a>
+            </div>
+            <button class="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Create Blog Section -->
+    <section class="create-blog-page">
+        <div class="create-blog-container">
+            <h1><i class="fas fa-pen-fancy" style="color: var(--primary);"></i> Create New Blog Post</h1>
+
+            <div id="blogAlert" class="alert"></div>
+
+            <div class="create-blog-form fade-in">
+                <form id="createBlogForm" novalidate>
+
+                    <div class="form-group">
+                        <label for="blogTitle">Blog Title</label>
+                        <input type="text" id="blogTitle" class="no-icon" placeholder="Enter an engaging title for your blog post..." required>
+                        <p class="error-msg"></p>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="blogCategory">Category</label>
+                            <select id="blogCategory" class="no-icon" required>
+                                <option value="">Select a category</option>
+                                <option value="technology">Technology</option>
+                                <option value="design">Design</option>
+                                <option value="lifestyle">Lifestyle</option>
+                                <option value="travel">Travel</option>
+                                <option value="education">Education</option>
+                                <option value="health">Health & Fitness</option>
+                                <option value="business">Business</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <p class="error-msg"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="blogTags">Tags</label>
+                            <input type="text" id="blogTags" class="no-icon" placeholder="e.g. html, css, javascript">
+                        </div>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="form-group">
+                        <label>Cover Image</label>
+                        <div class="image-upload">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag & drop or <span>click to upload</span></p>
+                            <p style="font-size: 0.8rem; margin-top: 5px; color: var(--text-light);">PNG, JPG, GIF up to 5MB</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blogContent">Blog Content</label>
+                        <textarea id="blogContent" class="no-icon" placeholder="Write your blog content here...&#10;&#10;You can write about your ideas, experiences, tutorials, or anything you'd like to share with the world." required></textarea>
+                        <p class="error-msg"></p>
+                        <div class="word-count">
+                            <span id="charCount">0</span> characters · <span id="wordCount">0</span> words
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" data-action="publish">
+                            <i class="fas fa-paper-plane"></i> Publish
+                        </button>
+                        <button type="submit" class="btn btn-secondary" data-action="draft">
+                            <i class="fas fa-save"></i> Save as Draft
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span>Blog</span>Space
+                </div>
+                <div class="footer-links">
+                    <a href="#">About</a>
+                    <a href="#">Privacy</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Contact</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 BlogSpace. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
