@@ -1,60 +1,56 @@
-# BlogSpace — Responsive Blog Application 📝
+# BlogSpace — Full Stack Blog Application 📝
 
-A responsive Blog Application built with pure **HTML, CSS, and JavaScript** as part of Module 1 (Frontend Development).
+A full-stack Blog Application built with **HTML, CSS, JavaScript (Frontend)** and **Node.js, Express.js (Backend)**.
 
-## 🚀 Live Pages
+- **Module 1**: Responsive Frontend UI (Home, Login, Register, Dashboard, Create Blog)
+- **Module 2**: Backend REST APIs (Express.js, User Registration, Login, Create Blog, Fetch & Delete APIs)
 
-- **Home** — Blog listing with hero section & card grid
-- **Login** — User login with form validation
-- **Register** — Account creation with password strength indicator
-- **Dashboard** — User dashboard with stats & posts management
-- **Create Blog** — Write & publish blog posts with image upload
+---
+
+## 🚀 Live Pages & Features
+
+- **Home (`index.html`)** — Dynamic blog cards fetched from Node.js Express REST API
+- **Login (`login.html`)** — User authentication via `POST /api/login` with JWT tokens
+- **Register (`register.html`)** — Account creation via `POST /api/register` with `bcryptjs` password hashing
+- **Dashboard (`dashboard.html`)** — User stats, live user posts, and RESTful post deletion
+- **Create Blog (`create-blog.html`)** — Post creation connected to `POST /api/blogs`
+
+---
 
 ## 🛠️ Tech Stack
 
-- HTML5 (Semantic)
-- CSS3 (Flexbox, Grid, Media Queries)
-- JavaScript (Vanilla)
-- Font Awesome (Icons)
-- Google Fonts (Inter)
+### Frontend
+- HTML5 (Semantic Markup)
+- CSS3 (Flexbox, Grid, CSS Variables, Animations)
+- JavaScript (Vanilla Fetch API)
+- Font Awesome 6 Icons
 
-## 📱 Responsive Design
+### Backend (Module 2)
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **REST APIs**: User Reg, Login, Get/Create/Delete Blogs
+- **Security**: `bcryptjs` (Password Hashing), `jsonwebtoken` (JWT Authentication)
+- **Middleware**: `cors`, `express.json()`
 
-Works on all screen sizes:
-- Mobile (≤480px)
-- Tablet (481px–768px)
-- Desktop (≥1025px)
+---
 
-## ✨ Features
+## 🏃 How to Run Locally
 
-- ✅ Responsive navbar with hamburger menu
-- ✅ Form validation with error messages
-- ✅ Password strength indicator
-- ✅ Dashboard with sidebar & stats cards
-- ✅ Blog post table with edit/delete actions
-- ✅ Image upload placeholder
-- ✅ Live word & character count
-- ✅ Smooth animations & hover effects
-
-## 📂 Project Structure
-
-```
-├── index.html          # Home page
-├── login.html          # Login page
-├── register.html       # Register page
-├── dashboard.html      # Dashboard page
-├── create-blog.html    # Create blog page
-├── css/
-│   └── style.css       # Stylesheet
-└── js/
-    └── app.js          # JavaScript
+### 1. Install Dependencies
+```bash
+npm install
 ```
 
-## 🏃 How to Run
+### 2. Start the Backend Server
+```bash
+npm start
+```
+The backend server will run at: `http://localhost:5000`
 
-1. Clone the repo
-2. Open `index.html` in your browser
-3. That's it! No build tools needed.
+### 3. Open Frontend
+Open `index.html` in your web browser or visit `http://localhost:5000/`.
+
+---
 
 ## 👤 Author
 
@@ -62,4 +58,4 @@ Works on all screen sizes:
 
 ---
 
-⭐ Star this repo if you found it useful!
+⭐ Star this repository if you found it helpful!

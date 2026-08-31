@@ -1,0 +1,19 @@
+{
+  "name": "blog-application-backend",
+  "version": "1.0.0",
+  "description": "Node.js and Express.js backend REST APIs for Blog Application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["node", "express", "rest-api", "blog-app"],
+  "author": "Anupam Bhatt",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
