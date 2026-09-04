@@ -13,11 +13,27 @@ const getInitials = (name) => {
     return parts[0].substring(0, 2).toUpperCase();
 };
 
-// GET /api/blogs - Get all blogs
+// GET /api/blogs - Get all blogs with optional search and category filter
 router.get('/', async (req, res) => {
     try {
+        const { search, category } = req.query;
+
         if (isDbConnected()) {
-            const blogs = await Blog.find().sort({ createdAt: -1 });
+            let filter = {};
+            if (category && category.toLowerCase() !== 'all') {
+                filter.category = new RegExp(`^${category}$`, 'i');
+            }
+            if (search && search.trim()) {
+                const searchRegex = new RegExp(search.trim(), 'i');
+                filter.$or = [
+                    { title: searchRegex },
+                    { content: searchRegex },
+                    { tags: searchRegex },
+                    { author: searchRegex }
+                ];
+            }
+
+            const blogs = await Blog.find(filter).sort({ createdAt: -1 });
             const formattedBlogs = blogs.map(b => ({
                 id: b._id.toString(),
                 _id: b._id.toString(),
@@ -37,14 +53,32 @@ router.get('/', async (req, res) => {
             return res.json({
                 success: true,
                 source: 'MongoDB',
+                count: formattedBlogs.length,
                 blogs: formattedBlogs
             });
         } else {
             const db = readData();
+            let blogs = db.blogs;
+
+            if (category && category.toLowerCase() !== 'all') {
+                blogs = blogs.filter(b => (b.category || '').toLowerCase() === category.toLowerCase());
+            }
+
+            if (search && search.trim()) {
+                const q = search.toLowerCase().trim();
+                blogs = blogs.filter(b => 
+                    (b.title || '').toLowerCase().includes(q) ||
+                    (b.content || '').toLowerCase().includes(q) ||
+                    (b.tags || '').toLowerCase().includes(q) ||
+                    (b.author || '').toLowerCase().includes(q)
+                );
+            }
+
             return res.json({
                 success: true,
                 source: 'DataStore',
-                blogs: db.blogs
+                count: blogs.length,
+                blogs: blogs
             });
         }
     } catch (err) {
@@ -53,7 +87,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET /api/blogs/:id - Get individual blog details (Module 3 requirement)
+// GET /api/blogs/:id - Get individual blog details
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -184,6 +218,80 @@ router.post('/', async (req, res) => {
     } catch (err) {
         console.error('Create Blog Error:', err);
         res.status(500).json({ success: false, message: 'Server error while creating blog post', error: err.message });
+    }
+});
+
+// PUT /api/blogs/:id - Update an existing blog post (Module 4 CRUD)
+router.put('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, category, tags, content, status } = req.body;
+
+        if (!title || !category || !content) {
+            return res.status(400).json({ success: false, message: 'Title, category, and content are required' });
+        }
+
+        if (isDbConnected() && mongoose.Types.ObjectId.isValid(id)) {
+            const updatedBlog = await Blog.findByIdAndUpdate(
+                id,
+                {
+                    title: title.trim(),
+                    category,
+                    tags: tags || '',
+                    content: content.trim(),
+                    status: status || 'published'
+                },
+                { new: true }
+            );
+
+            if (!updatedBlog) {
+                return res.status(404).json({ success: false, message: 'Blog post not found' });
+            }
+
+            return res.json({
+                success: true,
+                message: 'Blog post updated successfully in MongoDB!',
+                blog: {
+                    id: updatedBlog._id.toString(),
+                    _id: updatedBlog._id.toString(),
+                    title: updatedBlog.title,
+                    category: updatedBlog.category,
+                    tags: updatedBlog.tags,
+                    content: updatedBlog.content,
+                    author: updatedBlog.author,
+                    authorInitials: updatedBlog.authorInitials,
+                    date: updatedBlog.date,
+                    views: updatedBlog.views,
+                    status: updatedBlog.status,
+                    userId: updatedBlog.userId
+                }
+            });
+        } else {
+            const db = readData();
+            const index = db.blogs.findIndex(b => b.id === id || b._id === id);
+
+            if (index === -1) {
+                return res.status(404).json({ success: false, message: 'Blog post not found' });
+            }
+
+            db.blogs[index].title = title.trim();
+            db.blogs[index].category = category;
+            db.blogs[index].tags = tags || '';
+            db.blogs[index].content = content.trim();
+            db.blogs[index].status = status || db.blogs[index].status || 'published';
+            db.blogs[index].updatedAt = new Date().toISOString();
+
+            writeData(db);
+
+            return res.json({
+                success: true,
+                message: 'Blog post updated successfully!',
+                blog: db.blogs[index]
+            });
+        }
+    } catch (err) {
+        console.error('Update Blog Error:', err);
+        res.status(500).json({ success: false, message: 'Failed to update blog post', error: err.message });
     }
 });
 

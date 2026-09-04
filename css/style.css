@@ -1521,3 +1521,121 @@ select {
         align-items: flex-start;
     }
 }
+
+/* ===== Search & Category Filter Styles (Module 4) ===== */
+.filter-controls-container {
+    max-width: 900px;
+    margin: 0 auto 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.search-bar-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.search-bar-wrapper i.search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 14px 48px 14px 48px;
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 30px;
+    font-size: 1rem;
+    color: var(--text-primary);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    transition: var(--transition);
+}
+
+.search-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.15);
+}
+
+.search-clear-btn {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 1rem;
+    display: none;
+}
+
+.search-clear-btn:hover {
+    color: var(--danger);
+}
+
+.category-filter-pills {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.category-pill {
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.category-pill:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.category-pill.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    box-shadow: 0 4px 14px rgba(108, 99, 255, 0.3);
+}
+
+.no-blogs-found {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    border: 1px dashed var(--border);
+    grid-column: 1 / -1;
+}
+
+.no-blogs-found i {
+    font-size: 3rem;
+    color: var(--text-light);
+    margin-bottom: 15px;
+}
+
+.no-blogs-found h3 {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.no-blogs-found p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}

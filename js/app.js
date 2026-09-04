@@ -1,5 +1,5 @@
 ﻿/* ========================================
-   Blog Application — JavaScript (Module 3: Database & Single Blog Integration)
+   Blog Application — JavaScript (Module 4: Full CRUD, Search & Category Filters)
    ======================================== */
 
 const API_BASE_URL = window.location.origin.includes('5000') ? '/api' : 'http://localhost:5000/api';
@@ -55,16 +55,24 @@ document.addEventListener('DOMContentLoaded', function () {
             return { icon: 'fa-palette', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', tagClass: 'tag-design' };
         } else if (cat.includes('life') || cat.includes('health') || cat.includes('mind')) {
             return { icon: 'fa-leaf', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', tagClass: 'tag-lifestyle' };
+        } else if (cat.includes('travel') || cat.includes('trip') || cat.includes('place')) {
+            return { icon: 'fa-plane', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', tagClass: 'tag-travel' };
         } else if (cat.includes('biz') || cat.includes('business') || cat.includes('career') || cat.includes('finance')) {
             return { icon: 'fa-chart-line', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', tagClass: 'tag-business' };
         }
         return { icon: 'fa-newspaper', gradient: 'linear-gradient(135deg, #6C63FF 0%, #3F3D56 100%)', tagClass: 'tag-tech' };
     }
 
+    // ===== Global Blog Cache for Instant Client-Side Search & Filter =====
+    let allBlogsCache = [];
+    let currentCategory = 'all';
+    let currentSearchQuery = '';
+
     // ===== Fetch & Display Blogs on Home Page =====
-    const blogGrid = document.querySelector('.blog-grid');
+    const blogGrid = document.getElementById('homeBlogGrid') || document.querySelector('.blog-grid');
     if (blogGrid && (currentPage === 'index.html' || currentPage === '')) {
         loadHomeBlogs(blogGrid);
+        setupSearchAndFilter(blogGrid);
     }
 
     // ===== Fetch & Display Individual Blog Details (Module 3) =====
@@ -72,10 +80,16 @@ document.addEventListener('DOMContentLoaded', function () {
         loadSingleBlogDetails();
     }
 
-    // ===== Fetch & Display Blogs on Dashboard =====
+    // ===== Fetch & Display Blogs on Dashboard (Module 4: Edit & Delete CRUD) =====
     const postsTableBody = document.querySelector('.posts-table tbody');
     if (postsTableBody && currentPage === 'dashboard.html') {
         loadDashboardBlogs(postsTableBody);
+    }
+
+    // ===== Create / Edit Blog Form Handling (Module 4: Update CRUD) =====
+    const createBlogForm = document.getElementById('createBlogForm');
+    if (createBlogForm && currentPage.includes('create-blog.html')) {
+        setupCreateOrEditBlogForm(createBlogForm);
     }
 
     // ===== Login Form Submission (API Call) =====
@@ -218,112 +232,223 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ===== Create Blog Form Submission (API Call) =====
-    const createBlogForm = document.getElementById('createBlogForm');
-    if (createBlogForm) {
-        createBlogForm.addEventListener('submit', async function (e) {
+    // ===== Create / Edit Blog Post Handler (Module 4: Update CRUD) =====
+    function setupCreateOrEditBlogForm(form) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const editBlogId = urlParams.get('edit');
+        const isEditMode = !!editBlogId;
+
+        const headingEl = document.getElementById('createBlogHeading');
+        const submitPublishBtn = form.querySelector('button[data-action="publish"]');
+        const titleInput = document.getElementById('blogTitle');
+        const categoryInput = document.getElementById('blogCategory');
+        const tagsInput = document.getElementById('blogTags');
+        const contentInput = document.getElementById('blogContent');
+
+        if (isEditMode) {
+            document.title = 'BlogSpace — Edit Blog Post';
+            if (headingEl) {
+                headingEl.innerHTML = '<i class="fas fa-edit" style="color: var(--primary);"></i> Edit Blog Post';
+            }
+            if (submitPublishBtn) {
+                submitPublishBtn.innerHTML = '<i class="fas fa-save"></i> Update Blog Post';
+            }
+
+            // Pre-fill existing data
+            fetch(`${API_BASE_URL}/blogs/${editBlogId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.blog) {
+                        const b = data.blog;
+                        if (titleInput) titleInput.value = b.title || '';
+                        if (categoryInput) categoryInput.value = (b.category || 'technology').toLowerCase();
+                        if (tagsInput) tagsInput.value = b.tags || '';
+                        if (contentInput) {
+                            contentInput.value = b.content || '';
+                            updateWordCount(contentInput.value);
+                        }
+                    }
+                })
+                .catch(err => console.log('Error fetching post for edit:', err));
+        }
+
+        form.addEventListener('submit', async function (e) {
             e.preventDefault();
             const action = e.submitter ? e.submitter.dataset.action : 'publish';
             let isValid = true;
 
-            const title = document.getElementById('blogTitle');
-            const category = document.getElementById('blogCategory');
-            const tags = document.getElementById('blogTags');
-            const content = document.getElementById('blogContent');
+            clearErrors(form);
 
-            clearErrors(createBlogForm);
-
-            if (!title.value.trim()) {
-                showError(title, 'Blog title is required');
+            if (!titleInput.value.trim()) {
+                showError(titleInput, 'Blog title is required');
                 isValid = false;
             }
 
-            if (!category.value) {
-                showError(category, 'Please select a category');
+            if (!categoryInput.value) {
+                showError(categoryInput, 'Please select a category');
                 isValid = false;
             }
 
-            if (!content.value.trim()) {
-                showError(content, 'Blog content is required');
+            if (!contentInput.value.trim()) {
+                showError(contentInput, 'Blog content is required');
                 isValid = false;
             }
 
             if (isValid) {
                 try {
-                    const response = await fetch(`${API_BASE_URL}/blogs`, {
-                        method: 'POST',
+                    const endpoint = isEditMode ? `${API_BASE_URL}/blogs/${editBlogId}` : `${API_BASE_URL}/blogs`;
+                    const method = isEditMode ? 'PUT' : 'POST';
+
+                    const payload = {
+                        title: titleInput.value.trim(),
+                        category: categoryInput.value,
+                        tags: tagsInput ? tagsInput.value.trim() : '',
+                        content: contentInput.value.trim(),
+                        status: action === 'draft' ? 'draft' : 'published',
+                        author: currentUser ? currentUser.fullName : 'Aman Kumar',
+                        userId: currentUser ? (currentUser.id || currentUser._id) : 'user_default'
+                    };
+
+                    const response = await fetch(endpoint, {
+                        method: method,
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            title: title.value.trim(),
-                            category: category.value,
-                            tags: tags ? tags.value.trim() : '',
-                            content: content.value.trim(),
-                            status: action === 'draft' ? 'draft' : 'published',
-                            author: currentUser ? currentUser.fullName : 'Aman Kumar',
-                            userId: currentUser ? (currentUser.id || currentUser._id) : 'user_default'
-                        })
+                        body: JSON.stringify(payload)
                     });
 
                     const data = await response.json();
 
                     if (response.ok && data.success) {
-                        showAlert('blogAlert', action === 'draft' ? 'Saved as draft in database!' : 'Blog published successfully to Database!', 'success');
+                        const successMsg = isEditMode 
+                            ? 'Blog post updated successfully!' 
+                            : (action === 'draft' ? 'Saved as draft!' : 'Blog published successfully!');
+
+                        showAlert('blogAlert', successMsg, 'success');
                         setTimeout(function () {
                             window.location.href = 'dashboard.html';
                         }, 1200);
                     } else {
-                        showAlert('blogAlert', data.message || 'Failed to create blog post', 'error');
+                        showAlert('blogAlert', data.message || 'Operation failed', 'error');
                     }
                 } catch (err) {
-                    showAlert('blogAlert', 'Error connecting to backend database server', 'error');
+                    showAlert('blogAlert', 'Error communicating with backend server', 'error');
                 }
             }
         });
 
-        const blogContent = document.getElementById('blogContent');
-        if (blogContent) {
-            blogContent.addEventListener('input', function () {
+        if (contentInput) {
+            contentInput.addEventListener('input', function () {
                 updateWordCount(this.value);
             });
         }
     }
 
-    // ===== API Loader Functions =====
+    // ===== Live Search & Category Filter (Module 4) =====
+    function setupSearchAndFilter(gridElement) {
+        const searchInput = document.getElementById('blogSearchInput');
+        const clearBtn = document.getElementById('searchClearBtn');
+        const filterPills = document.querySelectorAll('.category-pill');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                currentSearchQuery = this.value.trim();
+                if (clearBtn) {
+                    clearBtn.style.display = currentSearchQuery ? 'block' : 'none';
+                }
+                filterAndRenderBlogs(gridElement);
+            });
+        }
+
+        if (clearBtn && searchInput) {
+            clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                currentSearchQuery = '';
+                clearBtn.style.display = 'none';
+                filterAndRenderBlogs(gridElement);
+            });
+        }
+
+        filterPills.forEach(pill => {
+            pill.addEventListener('click', function () {
+                filterPills.forEach(p => p.classList.remove('active'));
+                this.classList.add('active');
+                currentCategory = this.dataset.category || 'all';
+                filterAndRenderBlogs(gridElement);
+            });
+        });
+    }
+
+    function filterAndRenderBlogs(gridElement) {
+        let filtered = allBlogsCache;
+
+        // Apply Category Filter
+        if (currentCategory !== 'all') {
+            filtered = filtered.filter(b => (b.category || '').toLowerCase() === currentCategory.toLowerCase());
+        }
+
+        // Apply Search Query Filter
+        if (currentSearchQuery) {
+            const q = currentSearchQuery.toLowerCase();
+            filtered = filtered.filter(b => 
+                (b.title || '').toLowerCase().includes(q) ||
+                (b.content || '').toLowerCase().includes(q) ||
+                (b.tags || '').toLowerCase().includes(q) ||
+                (b.author || '').toLowerCase().includes(q)
+            );
+        }
+
+        renderBlogCards(gridElement, filtered);
+    }
+
+    function renderBlogCards(gridElement, blogs) {
+        if (!blogs || blogs.length === 0) {
+            gridElement.innerHTML = `
+                <div class="no-blogs-found fade-in">
+                    <i class="fas fa-search-minus"></i>
+                    <h3>No blog posts found</h3>
+                    <p>Try searching for a different keyword or select another category.</p>
+                </div>
+            `;
+            return;
+        }
+
+        gridElement.innerHTML = blogs.map(blog => {
+            const blogId = blog._id || blog.id;
+            const style = getCategoryStyle(blog.category);
+            return `
+            <div class="blog-card fade-in" onclick="window.location.href='blog-details.html?id=${blogId}'" style="cursor: pointer;">
+                <div class="blog-card-img" style="background: ${style.gradient};">
+                    <i class="fas ${style.icon}"></i>
+                </div>
+                <div class="blog-card-body">
+                    <span class="blog-card-tag ${style.tagClass}">${escapeHtml(blog.category || 'Technology')}</span>
+                    <h3>${escapeHtml(blog.title)}</h3>
+                    <p>${escapeHtml((blog.content || '').substring(0, 120))}...</p>
+                    <div class="blog-card-footer">
+                        <div class="blog-author">
+                            <div class="blog-author-avatar">${escapeHtml(blog.authorInitials || 'AU')}</div>
+                            <div class="blog-author-info">
+                                <span>${escapeHtml(blog.author || 'Anonymous')}</span>
+                                <small>${blog.date || 'Recent'}</small>
+                            </div>
+                        </div>
+                        <a href="blog-details.html?id=${blogId}" class="read-more" onclick="event.stopPropagation();">
+                            Read <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+        }).join('');
+    }
 
     async function loadHomeBlogs(gridElement) {
         try {
             const res = await fetch(`${API_BASE_URL}/blogs`);
             const data = await res.json();
 
-            if (data.success && data.blogs && data.blogs.length > 0) {
-                gridElement.innerHTML = data.blogs.map(blog => {
-                    const blogId = blog._id || blog.id;
-                    const style = getCategoryStyle(blog.category);
-                    return `
-                    <div class="blog-card fade-in" onclick="window.location.href='blog-details.html?id=${blogId}'" style="cursor: pointer;">
-                        <div class="blog-card-img" style="background: ${style.gradient};">
-                            <i class="fas ${style.icon}"></i>
-                        </div>
-                        <div class="blog-card-body">
-                            <span class="blog-card-tag ${style.tagClass}">${escapeHtml(blog.category || 'Technology')}</span>
-                            <h3>${escapeHtml(blog.title)}</h3>
-                            <p>${escapeHtml(blog.content.substring(0, 120))}...</p>
-                            <div class="blog-card-footer">
-                                <div class="blog-author">
-                                    <div class="blog-author-avatar">${escapeHtml(blog.authorInitials || 'AU')}</div>
-                                    <div class="blog-author-info">
-                                        <span>${escapeHtml(blog.author || 'Anonymous')}</span>
-                                        <small>${blog.date || 'Recent'}</small>
-                                    </div>
-                                </div>
-                                <a href="blog-details.html?id=${blogId}" class="read-more" onclick="event.stopPropagation();">
-                                    Read <i class="fas fa-arrow-right"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                }).join('');
+            if (data.success && data.blogs) {
+                allBlogsCache = data.blogs;
+                renderBlogCards(gridElement, allBlogsCache);
             }
         } catch (err) {
             console.log('Error loading home blogs from backend:', err);
@@ -376,7 +501,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (dateEl) dateEl.textContent = `Published on ${blog.date || 'Recent'}`;
                 if (viewsEl) viewsEl.textContent = blog.views || 1;
 
-                // Reading time calculation (average 200 words per min)
+                // Reading time calculation
                 const wordCount = (blog.content || '').trim().split(/\s+/).length;
                 const readMinutes = Math.max(1, Math.ceil(wordCount / 200));
                 if (readTimeEl) readTimeEl.textContent = `${readMinutes} min read`;
@@ -434,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (draftsEl) draftsEl.textContent = draftCount;
                 if (viewsEl) viewsEl.textContent = totalViews > 0 ? totalViews : '1.2K';
 
-                // Render Dashboard Table Rows
+                // Render Dashboard Table Rows (Module 4: Edit & Delete buttons connected)
                 tbodyElement.innerHTML = blogs.map(blog => {
                     const bId = blog._id || blog.id;
                     return `
@@ -449,10 +574,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         <td>${blog.views || 0}</td>
                         <td>
                             <div class="action-btns">
-                                <a href="blog-details.html?id=${bId}" class="action-btn" title="View Details" style="display: inline-flex; align-items: center; justify-content: center;">
+                                <a href="blog-details.html?id=${bId}" class="action-btn" title="View Article" style="display: inline-flex; align-items: center; justify-content: center;">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <button class="action-btn delete" data-id="${bId}" title="Delete">
+                                <a href="create-blog.html?edit=${bId}" class="action-btn edit" title="Edit Post" style="display: inline-flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+                                <button class="action-btn delete" data-id="${bId}" title="Delete Post">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -465,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 tbodyElement.querySelectorAll('.action-btn.delete').forEach(btn => {
                     btn.addEventListener('click', async function () {
                         const blogId = this.dataset.id;
-                        if (confirm('Are you sure you want to delete this post from database?')) {
+                        if (confirm('Are you sure you want to delete this post?')) {
                             try {
                                 const delRes = await fetch(`${API_BASE_URL}/blogs/${blogId}`, {
                                     method: 'DELETE'
@@ -480,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     }, 300);
                                 }
                             } catch (e) {
-                                alert('Error deleting blog post from database.');
+                                alert('Error deleting blog post.');
                             }
                         }
                     });

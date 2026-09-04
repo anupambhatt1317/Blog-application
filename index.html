@@ -48,7 +48,25 @@
                 <p>Explore our newest articles from talented writers</p>
             </div>
 
-            <div class="blog-grid">
+            <!-- Search & Category Filters (Module 4) -->
+            <div class="filter-controls-container">
+                <div class="search-bar-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="blogSearchInput" class="search-input" placeholder="Search blogs by title, tags, author, or keywords...">
+                    <button id="searchClearBtn" class="search-clear-btn" title="Clear search"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div class="category-filter-pills" id="categoryFilters">
+                    <button class="category-pill active" data-category="all"><i class="fas fa-th-large"></i> All</button>
+                    <button class="category-pill" data-category="technology"><i class="fas fa-code"></i> Technology</button>
+                    <button class="category-pill" data-category="design"><i class="fas fa-palette"></i> Design</button>
+                    <button class="category-pill" data-category="lifestyle"><i class="fas fa-leaf"></i> Lifestyle</button>
+                    <button class="category-pill" data-category="travel"><i class="fas fa-plane"></i> Travel</button>
+                    <button class="category-pill" data-category="business"><i class="fas fa-chart-line"></i> Business</button>
+                </div>
+            </div>
+
+            <div class="blog-grid" id="homeBlogGrid">
 
                 <!-- Blog Card 1 -->
                 <div class="blog-card fade-in">
