@@ -6,6 +6,13 @@
       "email": "tester_1788531082274@example.com",
       "password": "$2a$10$NUuZd74AxRdnbil/zN8oJOh0suT92CdLawKoGinbsqUTx6O4D8SmG",
       "createdAt": "2026-09-04T14:11:22.476Z"
+    },
+    {
+      "id": "user_1788531397403",
+      "fullName": "Anupam bhatt",
+      "email": "anupambhatt639106@gmail.com",
+      "password": "$2a$10$K9pVa4ncP4Alp4hBMpwJMOTzRNp5F1Ey1f1gcwxjczagA50eh7HFS",
+      "createdAt": "2026-09-04T14:16:37.403Z"
     }
   ],
   "blogs": [

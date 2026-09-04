@@ -1,17 +1,25 @@
-{
-  "name": "blog-application-backend",
+﻿{
+  "name": "blog-application",
   "version": "1.0.0",
-  "description": "Node.js and Express.js backend REST APIs for Blog Application",
+  "description": "Full Stack Blog Application built with HTML, CSS, JavaScript, Node.js, Express.js and MongoDB",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "build": "echo 'Build step completed'"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "keywords": [
     "node",
     "express",
+    "mongodb",
+    "mongoose",
+    "jwt",
     "rest-api",
-    "blog-app"
+    "blog-app",
+    "full-stack"
   ],
   "author": "Anupam Bhatt",
   "license": "ISC",
