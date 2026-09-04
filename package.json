@@ -7,13 +7,20 @@
     "start": "node server.js",
     "dev": "node server.js"
   },
-  "keywords": ["node", "express", "rest-api", "blog-app"],
+  "keywords": [
+    "node",
+    "express",
+    "rest-api",
+    "blog-app"
+  ],
   "author": "Anupam Bhatt",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.9.4"
   }
 }

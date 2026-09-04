@@ -1,5 +1,5 @@
-/* ========================================
-   Blog Application — JavaScript (Connected to Node/Express Backend APIs)
+﻿/* ========================================
+   Blog Application — JavaScript (Module 3: Database & Single Blog Integration)
    ======================================== */
 
 const API_BASE_URL = window.location.origin.includes('5000') ? '/api' : 'http://localhost:5000/api';
@@ -46,10 +46,30 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // ===== Category Icon & Gradient Mapper =====
+    function getCategoryStyle(category) {
+        const cat = (category || '').toLowerCase();
+        if (cat.includes('tech') || cat.includes('code') || cat.includes('web')) {
+            return { icon: 'fa-code', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', tagClass: 'tag-tech' };
+        } else if (cat.includes('design') || cat.includes('ui') || cat.includes('ux') || cat.includes('art')) {
+            return { icon: 'fa-palette', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', tagClass: 'tag-design' };
+        } else if (cat.includes('life') || cat.includes('health') || cat.includes('mind')) {
+            return { icon: 'fa-leaf', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', tagClass: 'tag-lifestyle' };
+        } else if (cat.includes('biz') || cat.includes('business') || cat.includes('career') || cat.includes('finance')) {
+            return { icon: 'fa-chart-line', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', tagClass: 'tag-business' };
+        }
+        return { icon: 'fa-newspaper', gradient: 'linear-gradient(135deg, #6C63FF 0%, #3F3D56 100%)', tagClass: 'tag-tech' };
+    }
+
     // ===== Fetch & Display Blogs on Home Page =====
     const blogGrid = document.querySelector('.blog-grid');
     if (blogGrid && (currentPage === 'index.html' || currentPage === '')) {
         loadHomeBlogs(blogGrid);
+    }
+
+    // ===== Fetch & Display Individual Blog Details (Module 3) =====
+    if (currentPage.includes('blog-details.html')) {
+        loadSingleBlogDetails();
     }
 
     // ===== Fetch & Display Blogs on Dashboard =====
@@ -123,15 +143,16 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             let isValid = true;
 
-            const fullName = document.getElementById('regName');
+            const name = document.getElementById('regName');
             const email = document.getElementById('regEmail');
             const password = document.getElementById('regPassword');
-            const confirmPassword = document.getElementById('regConfirmPassword');
+            const confirm = document.getElementById('regConfirmPassword');
+            const terms = document.getElementById('regTerms');
 
             clearErrors(registerForm);
 
-            if (!fullName.value.trim()) {
-                showError(fullName, 'Full name is required');
+            if (!name.value.trim()) {
+                showError(name, 'Full name is required');
                 isValid = false;
             }
 
@@ -143,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 isValid = false;
             }
 
-            if (!password.value) {
+            if (!password.value.trim()) {
                 showError(password, 'Password is required');
                 isValid = false;
             } else if (password.value.length < 6) {
@@ -151,11 +172,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 isValid = false;
             }
 
-            if (!confirmPassword.value) {
-                showError(confirmPassword, 'Please confirm your password');
+            if (confirm.value !== password.value) {
+                showError(confirm, 'Passwords do not match');
                 isValid = false;
-            } else if (password.value !== confirmPassword.value) {
-                showError(confirmPassword, 'Passwords do not match');
+            }
+
+            if (terms && !terms.checked) {
+                showError(terms, 'You must agree to the Terms of Service');
                 isValid = false;
             }
 
@@ -165,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            fullName: fullName.value.trim(),
+                            fullName: name.value.trim(),
                             email: email.value.trim(),
                             password: password.value
                         })
@@ -174,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const data = await response.json();
 
                     if (response.ok && data.success) {
-                        showAlert('registerAlert', 'Account created successfully! Redirecting to Login...', 'success');
+                        showAlert('registerAlert', 'Account registered successfully! Redirecting to login...', 'success');
                         setTimeout(function () {
                             window.location.href = 'login.html';
                         }, 1500);
@@ -237,14 +260,14 @@ document.addEventListener('DOMContentLoaded', function () {
                             content: content.value.trim(),
                             status: action === 'draft' ? 'draft' : 'published',
                             author: currentUser ? currentUser.fullName : 'Aman Kumar',
-                            userId: currentUser ? currentUser.id : 'user_default'
+                            userId: currentUser ? (currentUser.id || currentUser._id) : 'user_default'
                         })
                     });
 
                     const data = await response.json();
 
                     if (response.ok && data.success) {
-                        showAlert('blogAlert', action === 'draft' ? 'Saved as draft!' : 'Blog published successfully!', 'success');
+                        showAlert('blogAlert', action === 'draft' ? 'Saved as draft in database!' : 'Blog published successfully to Database!', 'success');
                         setTimeout(function () {
                             window.location.href = 'dashboard.html';
                         }, 1200);
@@ -252,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         showAlert('blogAlert', data.message || 'Failed to create blog post', 'error');
                     }
                 } catch (err) {
-                    showAlert('blogAlert', 'Error connecting to backend REST API.', 'error');
+                    showAlert('blogAlert', 'Error connecting to backend database server', 'error');
                 }
             }
         });
@@ -265,35 +288,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ===== Sidebar Toggle (Dashboard) =====
-    const sidebarToggle = document.querySelector('.sidebar-toggle-btn');
-    const sidebar = document.querySelector('.sidebar');
-
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', function () {
-            sidebar.classList.toggle('active');
-        });
-
-        document.addEventListener('click', function (e) {
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-                    sidebar.classList.remove('active');
-                }
-            }
-        });
-    }
-
-    // ===== Logout Event Handlers =====
-    document.querySelectorAll('a[href="login.html"]').forEach(link => {
-        if (link.textContent.includes('Logout')) {
-            link.addEventListener('click', function () {
-                localStorage.removeItem('blog_user');
-                localStorage.removeItem('blog_token');
-            });
-        }
-    });
-
-    // ===== Helper Functions =====
+    // ===== API Loader Functions =====
 
     async function loadHomeBlogs(gridElement) {
         try {
@@ -301,37 +296,123 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await res.json();
 
             if (data.success && data.blogs && data.blogs.length > 0) {
-                gridElement.innerHTML = data.blogs.map(blog => `
-                    <div class="blog-card fade-in">
-                        <div class="blog-card-img" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <i class="fas fa-file-alt"></i>
+                gridElement.innerHTML = data.blogs.map(blog => {
+                    const blogId = blog._id || blog.id;
+                    const style = getCategoryStyle(blog.category);
+                    return `
+                    <div class="blog-card fade-in" onclick="window.location.href='blog-details.html?id=${blogId}'" style="cursor: pointer;">
+                        <div class="blog-card-img" style="background: ${style.gradient};">
+                            <i class="fas ${style.icon}"></i>
                         </div>
                         <div class="blog-card-body">
-                            <span class="blog-card-tag tag-tech">${blog.category || 'General'}</span>
+                            <span class="blog-card-tag ${style.tagClass}">${escapeHtml(blog.category || 'Technology')}</span>
                             <h3>${escapeHtml(blog.title)}</h3>
                             <p>${escapeHtml(blog.content.substring(0, 120))}...</p>
                             <div class="blog-card-footer">
                                 <div class="blog-author">
-                                    <div class="blog-author-avatar">${blog.authorInitials || 'AK'}</div>
+                                    <div class="blog-author-avatar">${escapeHtml(blog.authorInitials || 'AU')}</div>
                                     <div class="blog-author-info">
-                                        <span>${escapeHtml(blog.author)}</span>
+                                        <span>${escapeHtml(blog.author || 'Anonymous')}</span>
                                         <small>${blog.date || 'Recent'}</small>
                                     </div>
                                 </div>
-                                <a href="#" class="read-more">Read <i class="fas fa-arrow-right"></i></a>
+                                <a href="blog-details.html?id=${blogId}" class="read-more" onclick="event.stopPropagation();">
+                                    Read <i class="fas fa-arrow-right"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
-                `).join('');
+                `;
+                }).join('');
             }
         } catch (err) {
-            console.log('Using default home blogs fallback');
+            console.log('Error loading home blogs from backend:', err);
+        }
+    }
+
+    async function loadSingleBlogDetails() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const blogId = urlParams.get('id');
+
+        const loadingEl = document.getElementById('detailsLoading');
+        const contentEl = document.getElementById('detailsContent');
+        const errorEl = document.getElementById('detailsError');
+
+        if (!blogId) {
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (errorEl) errorEl.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/blogs/${blogId}`);
+            const data = await res.json();
+
+            if (data.success && data.blog) {
+                const blog = data.blog;
+                const style = getCategoryStyle(blog.category);
+
+                document.title = `${blog.title} — BlogSpace`;
+
+                // Update text elements
+                const titleEl = document.getElementById('articleTitle');
+                const bodyEl = document.getElementById('articleBody');
+                const catEl = document.getElementById('articleCategory');
+                const breadcrumbCatEl = document.getElementById('breadcrumbCategory');
+                const authorEl = document.getElementById('articleAuthor');
+                const avatarEl = document.getElementById('articleAuthorAvatar');
+                const dateEl = document.getElementById('articleDate');
+                const viewsEl = document.getElementById('articleViews');
+                const readTimeEl = document.getElementById('articleReadTime');
+                const bannerEl = document.getElementById('articleBanner');
+                const tagsListEl = document.getElementById('articleTagsList');
+
+                if (titleEl) titleEl.textContent = blog.title;
+                if (bodyEl) bodyEl.textContent = blog.content;
+                if (catEl) catEl.textContent = blog.category || 'Technology';
+                if (breadcrumbCatEl) breadcrumbCatEl.textContent = blog.category || 'Technology';
+                if (authorEl) authorEl.textContent = blog.author || 'Anonymous';
+                if (avatarEl) avatarEl.textContent = blog.authorInitials || 'AU';
+                if (dateEl) dateEl.textContent = `Published on ${blog.date || 'Recent'}`;
+                if (viewsEl) viewsEl.textContent = blog.views || 1;
+
+                // Reading time calculation (average 200 words per min)
+                const wordCount = (blog.content || '').trim().split(/\s+/).length;
+                const readMinutes = Math.max(1, Math.ceil(wordCount / 200));
+                if (readTimeEl) readTimeEl.textContent = `${readMinutes} min read`;
+
+                // Banner styling
+                if (bannerEl) {
+                    bannerEl.style.background = style.gradient;
+                    bannerEl.innerHTML = `<i class="fas ${style.icon}"></i>`;
+                }
+
+                // Tags rendering
+                if (tagsListEl) {
+                    if (blog.tags && blog.tags.trim()) {
+                        const tagsArr = blog.tags.split(',').map(t => t.trim()).filter(Boolean);
+                        tagsListEl.innerHTML = tagsArr.map(tag => `<span class="article-tag-pill">#${escapeHtml(tag)}</span>`).join('');
+                    } else {
+                        tagsListEl.innerHTML = `<span class="article-tag-pill">#${blog.category || 'tech'}</span>`;
+                    }
+                }
+
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (contentEl) contentEl.style.display = 'block';
+            } else {
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (errorEl) errorEl.style.display = 'block';
+            }
+        } catch (err) {
+            console.error('Error fetching blog details:', err);
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (errorEl) errorEl.style.display = 'block';
         }
     }
 
     async function loadDashboardBlogs(tbodyElement) {
         try {
-            const userId = currentUser ? currentUser.id : 'all';
+            const userId = currentUser ? (currentUser.id || currentUser._id) : 'all';
             const res = await fetch(`${API_BASE_URL}/blogs/user/${userId}`);
             const data = await res.json();
 
@@ -354,30 +435,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (viewsEl) viewsEl.textContent = totalViews > 0 ? totalViews : '1.2K';
 
                 // Render Dashboard Table Rows
-                tbodyElement.innerHTML = blogs.map(blog => `
-                    <tr data-id="${blog.id}">
-                        <td><strong>${escapeHtml(blog.title)}</strong></td>
+                tbodyElement.innerHTML = blogs.map(blog => {
+                    const bId = blog._id || blog.id;
+                    return `
+                    <tr data-id="${bId}">
+                        <td>
+                            <a href="blog-details.html?id=${bId}" style="color: var(--primary); font-weight: 600;">
+                                ${escapeHtml(blog.title)}
+                            </a>
+                        </td>
                         <td><span class="status-badge ${blog.status === 'published' ? 'status-published' : 'status-draft'}">${blog.status === 'published' ? 'Published' : 'Draft'}</span></td>
                         <td>${blog.date || 'Aug 2025'}</td>
-                        <td>${blog.views || '—'}</td>
+                        <td>${blog.views || 0}</td>
                         <td>
                             <div class="action-btns">
-                                <button class="action-btn edit" title="Edit">
-                                    <i class="fas fa-pen"></i>
-                                </button>
-                                <button class="action-btn delete" data-id="${blog.id}" title="Delete">
+                                <a href="blog-details.html?id=${bId}" class="action-btn" title="View Details" style="display: inline-flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button class="action-btn delete" data-id="${bId}" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
-                `).join('');
+                `;
+                }).join('');
 
-                // Attach Delete Event Handler
+                // Attach delete button listeners
                 tbodyElement.querySelectorAll('.action-btn.delete').forEach(btn => {
                     btn.addEventListener('click', async function () {
                         const blogId = this.dataset.id;
-                        if (confirm('Are you sure you want to delete this post?')) {
+                        if (confirm('Are you sure you want to delete this post from database?')) {
                             try {
                                 const delRes = await fetch(`${API_BASE_URL}/blogs/${blogId}`, {
                                     method: 'DELETE'
@@ -386,10 +474,13 @@ document.addEventListener('DOMContentLoaded', function () {
                                 if (delData.success) {
                                     const row = this.closest('tr');
                                     row.style.opacity = '0';
-                                    setTimeout(() => row.remove(), 300);
+                                    setTimeout(() => {
+                                        row.remove();
+                                        loadDashboardBlogs(tbodyElement);
+                                    }, 300);
                                 }
                             } catch (e) {
-                                alert('Error deleting blog post from server.');
+                                alert('Error deleting blog post from database.');
                             }
                         }
                     });
@@ -413,6 +504,26 @@ document.addEventListener('DOMContentLoaded', function () {
         if (sidebarAvatar) {
             const initials = user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
             sidebarAvatar.textContent = initials || 'AK';
+        }
+
+        // Update Navbar Links for logged in user
+        const navLinksContainer = document.querySelector('.nav-links');
+        if (navLinksContainer) {
+            const loginLink = navLinksContainer.querySelector('a[href="login.html"]');
+            const signupLink = navLinksContainer.querySelector('a[href="register.html"]');
+            if (loginLink && signupLink) {
+                signupLink.textContent = 'Logout';
+                signupLink.href = '#';
+                signupLink.classList.remove('btn-primary');
+                signupLink.classList.add('btn-outline');
+                signupLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    localStorage.removeItem('blog_token');
+                    localStorage.removeItem('blog_user');
+                    window.location.href = 'index.html';
+                });
+                loginLink.style.display = 'none';
+            }
         }
     }
 

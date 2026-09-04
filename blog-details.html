@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogSpace — Article Details</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-blog"></i> BlogSpace
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="login.html">Login</a>
+                <a href="register.html" class="btn btn-primary btn-sm">Sign Up</a>
+            </div>
+            <button class="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Blog Details Section -->
+    <section class="blog-details-section">
+        <div class="container">
+            <div class="article-container" id="blogDetailsContainer">
+                
+                <!-- Loading State -->
+                <div class="details-loading" id="detailsLoading">
+                    <div class="spinner"></div>
+                    <h3>Loading Article Details...</h3>
+                    <p style="color: var(--text-secondary);">Fetching data securely from database</p>
+                </div>
+
+                <!-- Dynamic Content (Populated by js/app.js) -->
+                <div id="detailsContent" style="display: none;">
+                    <!-- Breadcrumbs -->
+                    <div class="article-breadcrumb">
+                        <a href="index.html"><i class="fas fa-arrow-left"></i> Back to All Articles</a>
+                        <span>/</span>
+                        <span id="breadcrumbCategory">Technology</span>
+                    </div>
+
+                    <!-- Category & Title -->
+                    <span class="article-category-badge" id="articleCategory">Technology</span>
+                    <h1 class="article-title" id="articleTitle">Getting Started with Web Development in 2025</h1>
+
+                    <!-- Author & Metadata Bar -->
+                    <div class="article-meta-bar">
+                        <div class="article-author-info">
+                            <div class="article-author-avatar" id="articleAuthorAvatar">AS</div>
+                            <div class="article-author-details">
+                                <h4 id="articleAuthor">Aman Sharma</h4>
+                                <span id="articleDate">Published on Aug 25, 2025</span>
+                            </div>
+                        </div>
+                        <div class="article-stats-info">
+                            <span><i class="fas fa-eye"></i> <span id="articleViews">0</span> views</span>
+                            <span><i class="fas fa-clock"></i> <span id="articleReadTime">3 min read</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Hero Banner Icon -->
+                    <div class="article-hero-banner" id="articleBanner">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+
+                    <!-- Full Article Body -->
+                    <div class="article-content-body" id="articleBody">
+                        Article content loading...
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="article-tags-wrapper" id="articleTagsWrapper">
+                        <span class="tag-label"><i class="fas fa-tags"></i> Tags:</span>
+                        <div id="articleTagsList" style="display: inline-flex; gap: 8px; flex-wrap: wrap;"></div>
+                    </div>
+
+                    <!-- Footer & Share Card -->
+                    <div class="article-footer-card">
+                        <div>
+                            <h4 style="margin-bottom: 4px; color: var(--text-primary);">Enjoyed this article?</h4>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Share it with your friends and fellow developers.</p>
+                        </div>
+                        <div class="article-share-buttons">
+                            <a href="#" class="share-btn twitter" title="Share on Twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="share-btn linkedin" title="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="share-btn facebook" title="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Back Button -->
+                    <div style="margin-top: 30px; text-align: center;">
+                        <a href="index.html" class="btn btn-outline" style="border: 1px solid var(--border);">
+                            <i class="fas fa-arrow-left"></i> Back to Home Feed
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div id="detailsError" style="display: none; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger); margin-bottom: 15px;"></i>
+                    <h2>Article Not Found</h2>
+                    <p style="color: var(--text-secondary); margin: 10px 0 25px;">The article you are looking for might have been deleted or does not exist.</p>
+                    <a href="index.html" class="btn btn-primary"><i class="fas fa-home"></i> Back to Home</a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3><i class="fas fa-blog"></i> BlogSpace</h3>
+                    <p>A modern platform to write, read, and share knowledge with the global developer community.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="create-blog.html">Create Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 BlogSpace. All rights reserved. Built for Codomax.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

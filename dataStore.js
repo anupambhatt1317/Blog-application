@@ -1,9 +1,9 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 
 const dataFilePath = path.join(__dirname, 'data.json');
 
-// Default initial data
+// Default initial data for resilient fallback
 const initialData = {
     users: [],
     blogs: [
@@ -11,8 +11,8 @@ const initialData = {
             id: "1",
             title: "Getting Started with Web Development in 2025",
             category: "technology",
-            tags: "webdev, html, css",
-            content: "Learn the essential tools and technologies you need to start your journey as a web developer. From HTML basics to modern frameworks.",
+            tags: "webdev, html, css, javascript, fullstack",
+            content: "Learn the essential tools and technologies you need to start your journey as a web developer. From HTML basics and modern CSS layouts to advanced full-stack JavaScript frameworks like Node.js and Express. Building projects is the fastest way to gain real-world confidence!",
             author: "Aman Sharma",
             authorInitials: "AS",
             date: "Aug 25, 2025",
@@ -24,8 +24,8 @@ const initialData = {
             id: "2",
             title: "UI/UX Design Principles Every Developer Should Know",
             category: "design",
-            tags: "ui, ux, design",
-            content: "Understanding design principles can make you a better developer. Explore the key concepts that drive great user experiences.",
+            tags: "ui, ux, design, webdesign, figma",
+            content: "Understanding design principles can make you a significantly better developer. Explore the key concepts that drive great user experiences, including visual hierarchy, color theory, typography, whitespace, and responsive layouts that delight users across all screen sizes.",
             author: "Priya Kapoor",
             authorInitials: "PK",
             date: "Aug 22, 2025",
@@ -37,12 +37,51 @@ const initialData = {
             id: "3",
             title: "Balancing Code and Life: A Developer's Guide",
             category: "lifestyle",
-            tags: "life, coding, balance",
-            content: "Tips and strategies for maintaining a healthy work-life balance while pursuing your passion in software development.",
+            tags: "life, coding, balance, productivity, health",
+            content: "Tips and strategies for maintaining a healthy work-life balance while pursuing your passion in software development. Avoid burnout by establishing clear boundaries, staying physically active, taking regular screen breaks, and pursuing offline hobbies.",
             author: "Rohit Verma",
             authorInitials: "RV",
             date: "Aug 20, 2025",
             views: 521,
+            status: "published",
+            userId: "user_default"
+        },
+        {
+            id: "4",
+            title: "Responsive Design: Building for Every Screen Size",
+            category: "technology",
+            tags: "responsive, css, mobilefirst, frontend",
+            content: "Master the art of responsive web design with CSS Flexbox, Grid, and media queries. Create layouts that fluidly adapt from mobile smartphones to ultra-wide desktop monitors without sacrificing usability or aesthetic appeal.",
+            author: "Neha Singh",
+            authorInitials: "NS",
+            date: "Aug 18, 2025",
+            views: 390,
+            status: "published",
+            userId: "user_default"
+        },
+        {
+            id: "5",
+            title: "Digital Nomad: Working From the Mountains of Manali",
+            category: "travel",
+            tags: "travel, remote, nomad, productivity",
+            content: "My personal experience of working remotely as a software developer amidst the scenic mountains of Manali. How natural surroundings boost mental clarity, reduce stress, and spark creative problem solving.",
+            author: "Aditya Kumar",
+            authorInitials: "AK",
+            date: "Aug 15, 2025",
+            views: 472,
+            status: "published",
+            userId: "user_default"
+        },
+        {
+            id: "6",
+            title: "AI and the Future of Software Development",
+            category: "technology",
+            tags: "ai, machinelearning, future, programming",
+            content: "How artificial intelligence and generative tools are transforming the way developers write, debug, test, and deploy applications. Learn how to leverage modern AI tools to accelerate your engineering workflow.",
+            author: "Sneha Mishra",
+            authorInitials: "SM",
+            date: "Aug 12, 2025",
+            views: 719,
             status: "published",
             userId: "user_default"
         }
@@ -69,5 +108,6 @@ function writeData(data) {
 
 module.exports = {
     readData,
-    writeData
+    writeData,
+    initialData
 };
