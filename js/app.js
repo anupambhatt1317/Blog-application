@@ -1,4 +1,4 @@
-﻿/* ========================================
+/* ========================================
    Blog Application — JavaScript (Module 4: Full CRUD, Search & Category Filters)
    ======================================== */
 
@@ -7,10 +7,29 @@ const API_BASE_URL = window.location.origin.includes('5000') ? '/api' : 'http://
 document.addEventListener('DOMContentLoaded', function () {
 
     // ===== User Session Management =====
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     const currentUser = JSON.parse(localStorage.getItem('blog_user') || 'null');
     const authToken = localStorage.getItem('blog_token');
 
+    // ===== Route Protection Guard (Module 5) =====
+    const protectedPages = ['dashboard.html', 'create-blog.html'];
+    if (protectedPages.some(page => currentPage.includes(page))) {
+        if (!currentUser || !authToken) {
+            window.location.href = 'login.html?msg=auth_required';
+            return;
+        }
+    }
+
+    // Check for login required redirect alert on login.html
+    if (currentPage.includes('login.html')) {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('msg') === 'auth_required') {
+            showAlert('loginAlert', 'Please log in to access your dashboard or create blog posts.', 'error');
+        }
+    }
+
     updateUserInterface(currentUser);
+    setupLogoutHandlers();
 
     // ===== Hamburger Menu Toggle =====
     const hamburger = document.querySelector('.hamburger');
@@ -31,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ===== Active Nav Link Highlighting =====
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     document.querySelectorAll('.nav-links a').forEach(function (link) {
         const href = link.getAttribute('href');
         if (href === currentPage) {
@@ -537,29 +555,49 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function loadDashboardBlogs(tbodyElement) {
         try {
-            const userId = currentUser ? (currentUser.id || currentUser._id) : 'all';
-            const res = await fetch(`${API_BASE_URL}/blogs/user/${userId}`);
+            const userId = currentUser ? (currentUser.id || currentUser._id) : 'user_default';
+            const headers = {};
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            const res = await fetch(`${API_BASE_URL}/blogs/user/${userId}`, { headers });
             const data = await res.json();
 
-            if (data.success && data.blogs) {
-                const blogs = data.blogs;
+            const blogs = (data.success && Array.isArray(data.blogs)) ? data.blogs : [];
 
-                // Update Stats Header Cards
-                const totalPostsEl = document.querySelector('.stat-card:nth-child(1) h3');
-                const publishedEl = document.querySelector('.stat-card:nth-child(2) h3');
-                const draftsEl = document.querySelector('.stat-card:nth-child(3) h3');
-                const viewsEl = document.querySelector('.stat-card:nth-child(4) h3');
+            // Update Stats Header Cards
+            const totalPostsEl = document.querySelector('.stat-card:nth-child(1) h3');
+            const publishedEl = document.querySelector('.stat-card:nth-child(2) h3');
+            const draftsEl = document.querySelector('.stat-card:nth-child(3) h3');
+            const viewsEl = document.querySelector('.stat-card:nth-child(4) h3');
 
-                const publishedCount = blogs.filter(b => b.status === 'published').length;
-                const draftCount = blogs.filter(b => b.status === 'draft').length;
-                const totalViews = blogs.reduce((acc, curr) => acc + (curr.views || 0), 0);
+            const publishedCount = blogs.filter(b => b.status === 'published').length;
+            const draftCount = blogs.filter(b => b.status === 'draft').length;
+            const totalViews = blogs.reduce((acc, curr) => acc + (curr.views || 0), 0);
 
-                if (totalPostsEl) totalPostsEl.textContent = blogs.length;
-                if (publishedEl) publishedEl.textContent = publishedCount;
-                if (draftsEl) draftsEl.textContent = draftCount;
-                if (viewsEl) viewsEl.textContent = totalViews > 0 ? totalViews : '1.2K';
+            if (totalPostsEl) totalPostsEl.textContent = blogs.length;
+            if (publishedEl) publishedEl.textContent = publishedCount;
+            if (draftsEl) draftsEl.textContent = draftCount;
+            if (viewsEl) viewsEl.textContent = totalViews;
 
-                // Render Dashboard Table Rows (Module 4: Edit & Delete buttons connected)
+            // Render Dashboard Table Rows or Empty State (Module 5)
+            if (blogs.length === 0) {
+                tbodyElement.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 45px 20px;">
+                            <div style="color: var(--text-secondary);">
+                                <i class="fas fa-feather-alt" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 12px; opacity: 0.7;"></i>
+                                <h3 style="color: var(--text-primary); font-size: 1.15rem; margin-bottom: 6px;">No blog posts published yet</h3>
+                                <p style="margin-bottom: 16px; font-size: 0.95rem;">You haven't written any articles yet. Share your stories with the world!</p>
+                                <a href="create-blog.html" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus"></i> Write Your First Post
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
                 tbodyElement.innerHTML = blogs.map(blog => {
                     const bId = blog._id || blog.id;
                     return `
@@ -570,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             </a>
                         </td>
                         <td><span class="status-badge ${blog.status === 'published' ? 'status-published' : 'status-draft'}">${blog.status === 'published' ? 'Published' : 'Draft'}</span></td>
-                        <td>${blog.date || 'Aug 2025'}</td>
+                        <td>${blog.date || 'Recent'}</td>
                         <td>${blog.views || 0}</td>
                         <td>
                             <div class="action-btns">
@@ -595,8 +633,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         const blogId = this.dataset.id;
                         if (confirm('Are you sure you want to delete this post?')) {
                             try {
+                                const delHeaders = {};
+                                if (authToken) delHeaders['Authorization'] = `Bearer ${authToken}`;
+
                                 const delRes = await fetch(`${API_BASE_URL}/blogs/${blogId}`, {
-                                    method: 'DELETE'
+                                    method: 'DELETE',
+                                    headers: delHeaders
                                 });
                                 const delData = await delRes.json();
                                 if (delData.success) {
@@ -628,10 +670,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const sidebarAvatar = document.querySelector('.sidebar-avatar');
 
         if (sidebarName) sidebarName.textContent = user.fullName;
-        if (sidebarHandle) sidebarHandle.textContent = `@${user.email.split('@')[0]}`;
+        if (sidebarHandle) sidebarHandle.textContent = `@${user.email ? user.email.split('@')[0] : 'user'}`;
         if (sidebarAvatar) {
             const initials = user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-            sidebarAvatar.textContent = initials || 'AK';
+            sidebarAvatar.textContent = initials || 'AU';
         }
 
         // Update Navbar Links for logged in user
@@ -644,15 +686,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 signupLink.href = '#';
                 signupLink.classList.remove('btn-primary');
                 signupLink.classList.add('btn-outline');
-                signupLink.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    localStorage.removeItem('blog_token');
-                    localStorage.removeItem('blog_user');
-                    window.location.href = 'index.html';
-                });
+                signupLink.addEventListener('click', performLogout);
                 loginLink.style.display = 'none';
             }
         }
+    }
+
+    function setupLogoutHandlers() {
+        const logoutNavBtn = document.getElementById('logoutBtnNav');
+        const logoutSidebarBtn = document.getElementById('logoutBtnSidebar');
+
+        if (logoutNavBtn) {
+            logoutNavBtn.addEventListener('click', performLogout);
+        }
+        if (logoutSidebarBtn) {
+            logoutSidebarBtn.addEventListener('click', performLogout);
+        }
+    }
+
+    function performLogout(e) {
+        if (e) e.preventDefault();
+        localStorage.removeItem('blog_token');
+        localStorage.removeItem('blog_user');
+        window.location.href = 'index.html';
     }
 
     function isValidEmail(email) {

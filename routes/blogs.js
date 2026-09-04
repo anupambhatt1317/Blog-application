@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Blog = require('../models/Blog');
@@ -323,10 +323,10 @@ router.get('/user/:userId', async (req, res) => {
             });
         } else {
             const db = readData();
-            const userBlogs = db.blogs.filter(b => b.userId === userId || userId === 'all');
+            const userBlogs = (userId === 'all') ? db.blogs : db.blogs.filter(b => b.userId === userId);
             return res.json({
                 success: true,
-                blogs: userBlogs.length > 0 ? userBlogs : db.blogs
+                blogs: userBlogs
             });
         }
     } catch (err) {

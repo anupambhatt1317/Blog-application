@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const authMiddleware = require('../middleware/auth');
 const { isDbConnected } = require('../config/db');
 const { readData, writeData } = require('../dataStore');
 
@@ -118,6 +119,54 @@ router.post('/login', async (req, res) => {
     } catch (err) {
         console.error('Login Error:', err);
         res.status(500).json({ success: false, message: 'Server error during login', error: err.message });
+    }
+});
+
+// GET /api/me - Get Current Authenticated User Profile (Module 5)
+router.get('/me', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        if (isDbConnected()) {
+            const user = await User.findById(userId).select('-password');
+            if (!user) {
+                return res.status(404).json({ success: false, message: 'User not found' });
+            }
+            return res.json({
+                success: true,
+                user: {
+                    id: user._id.toString(),
+                    fullName: user.fullName,
+                    email: user.email,
+                    createdAt: user.createdAt
+                }
+            });
+        } else {
+            const db = readData();
+            const user = db.users.find(u => u.id === userId || u._id === userId);
+            if (!user) {
+                return res.json({
+                    success: true,
+                    user: {
+                        id: req.user.id,
+                        fullName: req.user.fullName,
+                        email: req.user.email
+                    }
+                });
+            }
+            return res.json({
+                success: true,
+                user: {
+                    id: user.id,
+                    fullName: user.fullName,
+                    email: user.email,
+                    createdAt: user.createdAt
+                }
+            });
+        }
+    } catch (err) {
+        console.error('Get Profile Error:', err);
+        res.status(500).json({ success: false, message: 'Error retrieving user profile' });
     }
 });
 
